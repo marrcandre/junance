@@ -2,60 +2,124 @@
 
 Controle financeiro pessoal e familiar.
 
-O Junance será desenvolvido incrementalmente com Django, Django Templates, HTMX e PostgreSQL. O projeto foi preparado para desenvolvimento local com Docker Compose e para uma implantação futura na Vercel com PostgreSQL no Supabase.
+O Junance será desenvolvido incrementalmente com Django, Django Templates, HTMX e PostgreSQL. O ambiente Python usa **uv** para dependências e ambientes virtuais; o **Makefile** fornece comandos padronizados; o **Docker Compose** executa a aplicação e o PostgreSQL localmente.
 
 > Estado atual: fundação técnica e tela inicial. Ainda não há movimentações, cartões, famílias, autenticação própria nem importação financeira implementados.
 
 ## Stack
 
 - Python 3.13
+- uv para dependências, lockfile e ambiente virtual
 - Django 5.2 LTS
 - Django Templates + HTMX
 - PostgreSQL 17 no ambiente local
 - Supabase PostgreSQL para produção (a configurar)
 - Docker Compose
-- pytest + pytest-django
+- pytest + pytest-django + pytest-cov
 - Ruff
 - GitHub Actions
 
-## 1. Executar localmente
+## 1. Preparar o ambiente
 
-Requisitos: Git, Docker Engine e Docker Compose.
+Requisitos: Git, `uv`, GNU Make e, para executar com containers, Docker Engine com Docker Compose.
+
+No diretório do projeto, gere o lockfile e sincronize as dependências:
+
+```bash
+make lock
+make sync
+```
+
+O `uv.lock` gerado deve ser versionado no Git. Depois de criar ou alterar dependências, revise as mudanças em `pyproject.toml` e `uv.lock` antes de fazer commit.
+
+Comandos úteis:
+
+```bash
+make help
+make test
+make quality
+make check-django
+```
+
+## 2. Executar localmente com Django + PostgreSQL no Docker
+
+Copie as variáveis locais:
 
 ```bash
 cp .env.example .env
-docker compose up --build
 ```
 
-Abra `http://localhost:8000`.
-
-Em outro terminal:
+Inicie apenas o PostgreSQL pelo Docker Compose:
 
 ```bash
-docker compose exec web pytest
-docker compose exec web ruff check .
-docker compose exec web python manage.py check
+make db-up
 ```
 
-Criar usuário administrador local:
+Em seguida, execute migrations e servidor Django localmente pelo `uv`:
 
 ```bash
-docker compose exec web python manage.py createsuperuser
+make migrate
+make dev
 ```
 
-Parar os serviços:
+Abra `http://127.0.0.1:8000`.
+
+Para criar um administrador, em outro terminal:
 
 ```bash
-docker compose down
+make createsuperuser
+```
+
+Para parar o PostgreSQL:
+
+```bash
+make db-down
+```
+
+O servidor Django executado diretamente pelo `uv` usa `localhost:5432` como banco padrão. Se você definir `DATABASE_URL` no terminal, ela terá precedência sobre o padrão. A configuração do `.env` é consumida automaticamente pelo serviço conteinerizado; o comando `uv run` local não carrega `.env` por conta própria.
+
+## 3. Alternativa: executar tudo com Docker Compose
+
+Para executar a aplicação e o PostgreSQL dentro de containers:
+
+```bash
+cp .env.example .env
+make up
+```
+
+Abra `http://localhost:8000`. O serviço web aplica as migrations locais ao iniciar.
+
+Comandos úteis:
+
+```bash
+make logs
+make restart
+make down
 ```
 
 Os dados do banco local ficam no volume Docker `junance_postgres_data`. **Não use `docker compose down -v` a menos que queira apagar o banco local.**
 
-## 2. Subir para o GitHub
+## 4. Comandos do Makefile
 
-Crie um repositório vazio chamado `junance` na sua conta GitHub. Não marque a opção de adicionar README, `.gitignore` ou licença, pois estes arquivos já existem aqui.
+| Comando | Finalidade |
+|---|---|
+| `make sync` | Sincroniza dependências a partir de `pyproject.toml` e, quando presente, `uv.lock` |
+| `make lock` | Gera/atualiza o lockfile |
+| `make upgrade` | Atualiza dependências e sincroniza o ambiente |
+| `make add package=django-filter` | Adiciona dependência de produção |
+| `make add-dev package=pytest-mock` | Adiciona dependência de desenvolvimento |
+| `make dev` | Inicia o servidor Django local |
+| `make test` | Executa testes com pytest |
+| `make test-cov` | Executa testes com relatório de cobertura |
+| `make quality` | Executa lint e verifica formatação |
+| `make db-up` | Inicia o PostgreSQL local em container |
+| `make up` | Inicia aplicação e banco em containers |
 
-No diretório deste projeto:
+Consulte `make help` para a lista completa.
+
+## 5. Subir para o GitHub
+
+Crie um repositório vazio chamado `junance` na sua conta GitHub. Inclua o `uv.lock` gerado antes do primeiro commit. Não marque a opção de adicionar README, `.gitignore` ou licença, pois estes arquivos já existem aqui.
 
 ```bash
 git init
@@ -68,7 +132,7 @@ git push -u origin main
 
 Substitua `SEU_USUARIO` pelo seu usuário GitHub. O comando `git remote add` deve ser executado apenas uma vez. Se já houver um remote configurado, confira com `git remote -v` antes de alterá-lo.
 
-## 3. Tentar obter junance.vercel.app
+## 6. Tentar obter junance.vercel.app
 
 1. Entre na sua conta da Vercel.
 2. Escolha **Add New → Project**.
@@ -79,7 +143,7 @@ Substitua `SEU_USUARIO` pelo seu usuário GitHub. O comando `git remote add` dev
 
 A Vercel não permite reservar antecipadamente nomes `*.vercel.app`; eles dependem da disponibilidade. Se `junance.vercel.app` não estiver disponível, escolha um nome alternativo, como `junance-financas.vercel.app`.
 
-## 4. Variáveis de ambiente
+## 7. Variáveis de ambiente
 
 Para desenvolvimento local, use `.env.example` como referência e mantenha `.env` fora do Git.
 
@@ -92,7 +156,7 @@ Para a Vercel, configure no painel do projeto:
 
 Nunca faça commit de `.env`, senha do banco, token ou chave privada. Não envie segredos no chat.
 
-## 5. Banco remoto e migrações
+## 8. Banco remoto e migrações
 
 O Compose usa um PostgreSQL local, isolado do banco remoto. O banco do Supabase ainda não está conectado nem foi criado por este pacote.
 
@@ -105,7 +169,7 @@ Antes de apontar para produção:
 
 Não executamos migrações automaticamente durante o build/deploy: isso evita alterar o banco de produção de forma inadvertida. O processo será definido antes de criarmos os modelos de domínio.
 
-## 6. Próximas etapas
+## 9. Próximas etapas
 
 1. Fundação e execução local.
 2. Famílias, membros e isolamento de dados com testes.
