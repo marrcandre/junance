@@ -1,0 +1,34 @@
+{% load static %}
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>{% block title %}Junance{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <script src="https://unpkg.com/htmx.org@2.0.4" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="{% url 'core:dashboard' %}"><span class="brand-mark">J</span><span>junance</span></a>
+      <p class="nav-label">VISÃO GERAL</p>
+      <a class="nav-item active" href="{% url 'core:dashboard' %}">⌂ <span>Painel inicial</span></a>
+      <p class="nav-label">ORGANIZAÇÃO</p>
+      <div class="nav-item muted">↔ <span>Movimentações</span></div>
+      <div class="nav-item muted">▤ <span>Cartões</span></div>
+      <div class="nav-item muted">◷ <span>Planejamento</span></div>
+      <div class="nav-item muted">▥ <span>Investimentos</span></div>
+      <div class="sidebar-footer">Junance · MVP em construção</div>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <span>Área de trabalho</span>
+        <span class="environment"><span class="status-dot"></span> Protótipo</span>
+      </header>
+      <div class="page-content">{% block content %}{% endblock %}</div>
+    </main>
+  </div>
+</body>
+</html>

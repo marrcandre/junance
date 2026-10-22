@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: junance
+          POSTGRES_USER: junance
+          POSTGRES_PASSWORD: junance_test_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U junance -d junance"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DJANGO_SECRET_KEY: ci-only-not-a-secret
+      DJANGO_DEBUG: "1"
+      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1
+      DATABASE_URL: postgresql://junance:junance_test_only@localhost:5432/junance
+      DB_SSL_REQUIRE: "0"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - name: Install project and test tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      - name: Django system checks
+        run: python manage.py check
+      - name: Run tests
+        run: pytest
+      - name: Lint
+        run: ruff check .
