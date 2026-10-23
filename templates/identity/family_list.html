@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<main>
+  <h1>Minhas famílias</h1>
+  <a href="{% url 'identity:family_create' %}">Criar família</a>
+  <ul>
+    {% for membership in memberships %}
+      <li>{{ membership.family.name }} — {{ membership.get_role_display }}</li>
+    {% empty %}
+      <li>Você ainda não participa de uma família.</li>
+    {% endfor %}
+  </ul>
+</main>
+{% endblock %}
