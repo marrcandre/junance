@@ -71,6 +71,7 @@ class EventBase(models.Model):
     competence_date = models.DateField()
     paid_at = models.DateField(null=True, blank=True)
     description = models.CharField(max_length=255, blank=True)
+    is_void = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -99,6 +100,7 @@ class Transfer(models.Model):
     transaction_date = models.DateField()
     competence_date = models.DateField()
     description = models.CharField(max_length=255, blank=True)
+    is_void = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
