@@ -2,6 +2,7 @@ from django.conf import settings
 from django.db import models
 
 from identity.models import Family
+from ledger.models import Account
 
 
 class ImportBatch(models.Model):
@@ -12,6 +13,13 @@ class ImportBatch(models.Model):
         REJECTED = "rejected", "Rejeitado"
 
     family = models.ForeignKey(Family, on_delete=models.CASCADE, related_name="import_batches")
+    account = models.ForeignKey(
+        Account,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="import_batches",
+    )
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
     filename = models.CharField(max_length=255)
     source_format = models.CharField(max_length=20)

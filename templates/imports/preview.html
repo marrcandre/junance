@@ -1,16 +1,18 @@
 {% extends "base.html" %}
 
 {% block content %}
-<main>
-  <h1>Prévia de {{ batch.filename }}</h1>
+<section class="page-heading">
+  <div><p class="eyebrow">REVISÃO OBRIGATÓRIA</p><h1>Prévia de {{ batch.filename }}</h1><p class="lead">{{ entries|length }} lançamentos encontrados para a família {{ batch.family.name }}.</p></div>
+</section>
+<section class="account-list">
   <ul>
     {% for entry in entries %}
       <li>{{ entry.transaction_date }} — {{ entry.description }} — {{ entry.amount }}</li>
     {% endfor %}
   </ul>
-  <form method="post" action="{% url 'imports:confirm' batch.id %}">
+  <form method="post" action="{% url 'imports:confirm' batch.id %}" class="form-actions">
     {% csrf_token %}
-    <button type="submit">Confirmar importação</button>
+    <button class="button" type="submit">Confirmar importação</button>
   </form>
-</main>
+</section>
 {% endblock %}

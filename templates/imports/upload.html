@@ -1,13 +1,16 @@
 {% extends "base.html" %}
 
 {% block content %}
-<main>
-  <h1>Importar movimentações</h1>
-  <p>Importe um arquivo para revisar antes de confirmar.</p>
+<section class="page-heading">
+  <div><p class="eyebrow">DADOS HISTÓRICOS</p><h1>Importar movimentações</h1><p class="lead">Os lançamentos serão revisados antes de entrar na conta histórica da família {{ family.name }}.</p></div>
+</section>
+<section class="form-card">
+  <p><strong>Conta de destino:</strong> Histórico da planilha</p>
+  <p>Subtotais, saldos, investimentos e fórmulas de resumo não serão importados como despesas.</p>
   <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     <input type="file" name="file" accept=".csv,.ofx,.xlsx" required>
-    <button type="submit">Importar</button>
+    <div class="form-actions"><button class="button" type="submit">Gerar prévia</button></div>
   </form>
-</main>
+</section>
 {% endblock %}

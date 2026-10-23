@@ -183,6 +183,8 @@ O fluxo mínimo para começar é:
 1. Criar uma família em `/families/new/`.
 2. Adicionar uma conta em `/ledger/accounts/new/`.
 3. Registrar o primeiro lançamento em `/ledger/transactions/new/`.
+4. Importar a planilha em `/imports/`; o sistema cria a conta `Histórico da planilha`,
+   apresenta uma prévia e só grava as receitas e despesas depois da confirmação.
 
 O dashboard não cria dados fictícios automaticamente; os dados iniciais são
 cadastrados explicitamente pelo usuário.
