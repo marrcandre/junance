@@ -1,5 +1,7 @@
 .DEFAULT_GOAL := help
 
+UV_ENV = set -a; if [ -f .env ]; then . ./.env; fi; set +a;
+
 .PHONY: help sync lock upgrade tree add add-dev remove \
 	dev dev-base check-django createsuperuser makemigrations migrate migrations \
 	shell test test-cov lint lint-fix format format-check quality \
@@ -45,14 +47,14 @@ help:
 	@echo ""
 	@echo "Python:"
 	@echo "  make python                  Lista versões de Python disponíveis"
-	@echo "  make python-install version=3.13  Instala uma versão do Python"
-	@echo "  make python-pin version=3.13      Define a versão do projeto"
+	@echo "  make python-install version=3.15  Instala uma versão do Python"
+	@echo "  make python-pin version=3.15      Define a versão do projeto"
 	@echo ""
-	@echo "Docker Compose (aplicação + PostgreSQL local):"
-	@echo "  make up                      Constrói e inicia os serviços"
-	@echo "  make down                    Para os serviços (preserva o banco)"
-	@echo "  make restart                 Reinicia os serviços"
-	@echo "  make logs                    Acompanha os logs"
+	@echo "Docker Compose (PostgreSQL local):"
+	@echo "  make up                      Inicia o PostgreSQL (atalho para db-up)"
+	@echo "  make down                    Para o PostgreSQL (preserva o banco)"
+	@echo "  make restart                 Reinicia o PostgreSQL"
+	@echo "  make logs                    Acompanha os logs do PostgreSQL"
 	@echo "  make db-up                   Inicia apenas o PostgreSQL"
 	@echo "  make db-down                 Para apenas o PostgreSQL"
 	@echo "  make db-shell                Abre o psql no PostgreSQL local"
@@ -94,36 +96,36 @@ remove:
 # ============================================================================
 
 dev:
-	uv run --locked python manage.py runserver 127.0.0.1:8000
+	$(UV_ENV) uv run --locked python manage.py runserver 127.0.0.1:8000
 
 dev-base:
-	uv run --locked python manage.py runserver 0.0.0.0:8000
+	$(UV_ENV) uv run --locked python manage.py runserver 0.0.0.0:8000
 
 check-django:
-	uv run --locked python manage.py check
+	$(UV_ENV) uv run --locked python manage.py check
 
 createsuperuser:
-	uv run --locked python manage.py createsuperuser
+	$(UV_ENV) uv run --locked python manage.py createsuperuser
 
 makemigrations:
-	uv run --locked python manage.py makemigrations
+	$(UV_ENV) uv run --locked python manage.py makemigrations
 
 migrate:
-	uv run --locked python manage.py migrate
+	$(UV_ENV) uv run --locked python manage.py migrate
 
 migrations: makemigrations migrate
 
 shell:
-	uv run --locked python manage.py shell
+	$(UV_ENV) uv run --locked python manage.py shell
 
 test:
-	uv run --locked pytest
+	$(UV_ENV) uv run --locked pytest
 
 test-cov:
-	uv run --locked pytest --cov=config --cov=core --cov-report=term-missing
+	$(UV_ENV) uv run --locked pytest --cov=config --cov=core --cov-report=term-missing
 
 collectstatic:
-	uv run --locked python manage.py collectstatic --noinput
+	$(UV_ENV) uv run --locked python manage.py collectstatic --noinput
 
 # ============================================================================
 # Ruff
@@ -151,37 +153,36 @@ python:
 	uv python list
 
 python-install:
-	@test -n "$(version)" || (echo "Uso: make python-install version=3.13" && exit 2)
+	@test -n "$(version)" || (echo "Uso: make python-install version=3.15" && exit 2)
 	uv python install "$(version)"
 
 python-pin:
-	@test -n "$(version)" || (echo "Uso: make python-pin version=3.13" && exit 2)
+	@test -n "$(version)" || (echo "Uso: make python-pin version=3.15" && exit 2)
 	uv python pin "$(version)"
 
 # ============================================================================
 # Docker Compose — ambiente local conteinerizado
 # ============================================================================
 
-up:
-	docker compose up --build
+up: db-up
 
 down:
-	docker compose down
+	docker compose stop db
 
 restart:
-	docker compose restart
+	docker compose restart db
 
 logs:
-	docker compose logs -f --tail=100
+	docker compose logs -f --tail=100 db
 
 db-up:
-	docker compose up -d db
+	docker compose up -d --wait db
 
 db-down:
 	docker compose stop db
 
 db-shell:
-	docker compose exec db psql -U junance -d junance
+	docker compose exec db sh -c 'psql -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"'
 
 # ============================================================================
 # Deploy
@@ -189,4 +190,4 @@ db-shell:
 
 deploy-check:
 	uv sync --locked --all-groups
-	uv run --locked python manage.py check --deploy
+	$(UV_ENV) uv run --locked python manage.py check --deploy

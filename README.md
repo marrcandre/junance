@@ -2,15 +2,15 @@
 
 Controle financeiro pessoal e familiar.
 
-O Junance será desenvolvido incrementalmente com Django, Django Templates, HTMX e PostgreSQL. O ambiente Python usa **uv** para dependências e ambientes virtuais; o **Makefile** fornece comandos padronizados; o **Docker Compose** executa a aplicação e o PostgreSQL localmente.
+O Junance será desenvolvido incrementalmente com Django, Django Templates, HTMX e PostgreSQL. O ambiente Python usa **uv** para dependências e ambientes virtuais; o **Makefile** fornece comandos padronizados; o **Docker Compose** executa apenas o PostgreSQL localmente.
 
 > Estado atual: fundação técnica e tela inicial. Ainda não há movimentações, cartões, famílias, autenticação própria nem importação financeira implementados.
 
 ## Stack
 
-- Python 3.13
+- Python 3.15
 - uv para dependências, lockfile e ambiente virtual
-- Django 5.2 LTS
+- Django 6.1
 - Django Templates + HTMX
 - PostgreSQL 17 no ambiente local
 - Supabase PostgreSQL para produção (a configurar)
@@ -41,7 +41,7 @@ make quality
 make check-django
 ```
 
-## 2. Executar localmente com Django + PostgreSQL no Docker
+## 2. Executar localmente com PostgreSQL no Docker e Django via uv
 
 Copie as variáveis locais:
 
@@ -76,30 +76,18 @@ Para parar o PostgreSQL:
 make db-down
 ```
 
-O servidor Django executado diretamente pelo `uv` usa `localhost:5432` como banco padrão. Se você definir `DATABASE_URL` no terminal, ela terá precedência sobre o padrão. A configuração do `.env` é consumida automaticamente pelo serviço conteinerizado; o comando `uv run` local não carrega `.env` por conta própria.
+Os comandos Django do Makefile carregam automaticamente o arquivo `.env` antes de chamar o `uv`. A aplicação local conecta em `localhost:5432`; o nome `db` só é usado para comunicação entre containers e não faz parte deste fluxo.
 
-## 3. Alternativa: executar tudo com Docker Compose
+O banco fica no volume Docker `junance_postgres_data`. **Não use `docker compose down -v` a menos que queira apagar o banco local.**
 
-Para executar a aplicação e o PostgreSQL dentro de containers:
-
-```bash
-cp .env.example .env
-make up
-```
-
-Abra `http://localhost:8000`. O serviço web aplica as migrations locais ao iniciar.
-
-Comandos úteis:
+Para acompanhar o banco:
 
 ```bash
 make logs
-make restart
-make down
+make db-shell
 ```
 
-Os dados do banco local ficam no volume Docker `junance_postgres_data`. **Não use `docker compose down -v` a menos que queira apagar o banco local.**
-
-## 4. Comandos do Makefile
+## 3. Comandos do Makefile
 
 | Comando | Finalidade |
 |---|---|
@@ -113,11 +101,11 @@ Os dados do banco local ficam no volume Docker `junance_postgres_data`. **Não u
 | `make test-cov` | Executa testes com relatório de cobertura |
 | `make quality` | Executa lint e verifica formatação |
 | `make db-up` | Inicia o PostgreSQL local em container |
-| `make up` | Inicia aplicação e banco em containers |
+| `make up` | Inicia o PostgreSQL em container |
 
 Consulte `make help` para a lista completa.
 
-## 5. Subir para o GitHub
+## 4. Subir para o GitHub
 
 Crie um repositório vazio chamado `junance` na sua conta GitHub. Inclua o `uv.lock` gerado antes do primeiro commit. Não marque a opção de adicionar README, `.gitignore` ou licença, pois estes arquivos já existem aqui.
 
@@ -132,7 +120,7 @@ git push -u origin main
 
 Substitua `SEU_USUARIO` pelo seu usuário GitHub. O comando `git remote add` deve ser executado apenas uma vez. Se já houver um remote configurado, confira com `git remote -v` antes de alterá-lo.
 
-## 6. Tentar obter junance.vercel.app
+## 5. Tentar obter junance.vercel.app
 
 1. Entre na sua conta da Vercel.
 2. Escolha **Add New → Project**.
@@ -143,7 +131,7 @@ Substitua `SEU_USUARIO` pelo seu usuário GitHub. O comando `git remote add` dev
 
 A Vercel não permite reservar antecipadamente nomes `*.vercel.app`; eles dependem da disponibilidade. Se `junance.vercel.app` não estiver disponível, escolha um nome alternativo, como `junance-financas.vercel.app`.
 
-## 7. Variáveis de ambiente
+## 6. Variáveis de ambiente
 
 Para desenvolvimento local, use `.env.example` como referência e mantenha `.env` fora do Git.
 
@@ -156,9 +144,9 @@ Para a Vercel, configure no painel do projeto:
 
 Nunca faça commit de `.env`, senha do banco, token ou chave privada. Não envie segredos no chat.
 
-## 8. Banco remoto e migrações
+## 7. Banco remoto e migrações
 
-O Compose usa um PostgreSQL local, isolado do banco remoto. O banco do Supabase ainda não está conectado nem foi criado por este pacote.
+O Compose usa um PostgreSQL local, isolado do banco remoto, e o Django local se conecta a ele via `localhost`. O banco do Supabase ainda não está conectado nem foi criado por este pacote.
 
 Antes de apontar para produção:
 1. Crie o projeto Supabase e configure a URL de conexão.
@@ -169,7 +157,7 @@ Antes de apontar para produção:
 
 Não executamos migrações automaticamente durante o build/deploy: isso evita alterar o banco de produção de forma inadvertida. O processo será definido antes de criarmos os modelos de domínio.
 
-## 9. Próximas etapas
+## 8. Próximas etapas
 
 1. Fundação e execução local.
 2. Famílias, membros e isolamento de dados com testes.
