@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+<main>
+  <h1>Prévia de {{ batch.filename }}</h1>
+  <ul>
+    {% for entry in entries %}
+      <li>{{ entry.transaction_date }} — {{ entry.description }} — {{ entry.amount }}</li>
+    {% endfor %}
+  </ul>
+  <form method="post" action="{% url 'imports:confirm' batch.id %}">
+    {% csrf_token %}
+    <button type="submit">Confirmar importação</button>
+  </form>
+</main>
+{% endblock %}
