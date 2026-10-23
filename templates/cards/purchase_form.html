@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+<main>
+  <h1>Nova compra em {{ family.name }}</h1>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Registrar compra</button>
+  </form>
+</main>
+{% endblock %}

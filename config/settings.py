@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     "identity",
     "ledger",
     "audit",
+    "cards",
 ]
 
 MIDDLEWARE = [

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+<main>
+  <h1>Fatura de {{ invoice.card.name }}</h1>
+  <p>Competência: {{ invoice.competence_date }} · Vencimento: {{ invoice.due_date }}</p>
+  <p>Total aberto: {{ invoice.total_open }}</p>
+  <ul>
+    {% for installment in invoice.installments.all %}
+      <li>{{ installment.purchase.description }} — {{ installment.amount }} — {{ installment.get_status_display }}</li>
+    {% empty %}
+      <li>Nenhuma parcela nesta fatura.</li>
+    {% endfor %}
+  </ul>
+</main>
+{% endblock %}

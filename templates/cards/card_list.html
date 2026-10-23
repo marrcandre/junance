@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<main>
+  <h1>Cartões de {{ family.name }}</h1>
+  <a href="{% url 'cards:purchase_create' %}">Nova compra</a>
+  <ul>
+    {% for card in cards %}
+      <li>{{ card.name }} · final {{ card.last_four }}</li>
+    {% empty %}
+      <li>Nenhum cartão cadastrado.</li>
+    {% endfor %}
+  </ul>
+</main>
+{% endblock %}

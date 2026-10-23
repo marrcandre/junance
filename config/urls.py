@@ -6,4 +6,5 @@ urlpatterns = [
     path("", include("core.urls")),
     path("families/", include("identity.urls")),
     path("ledger/", include("ledger.urls")),
+    path("cards/", include("cards.urls")),
 ]
