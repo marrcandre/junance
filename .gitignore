@@ -20,3 +20,4 @@ media/
 .idea/
 .vscode/
 .vercel/
+.worktrees/
