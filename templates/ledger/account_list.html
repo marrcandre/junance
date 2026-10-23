@@ -1,14 +1,15 @@
 {% extends "base.html" %}
 
 {% block content %}
-<main>
-  <h1>Contas de {{ family.name }}</h1>
-  <ul>
+<section class="page-heading">
+  <div><p class="eyebrow">ORGANIZAÇÃO</p><h1>Contas de {{ family.name }}</h1><p class="lead">Contas e carteiras usadas pela família.</p></div>
+  <a class="button" href="{% url 'ledger:account_create' %}">Nova conta</a>
+</section>
+<section class="account-list">
     {% for account in accounts %}
-      <li>{{ account.name }} — {{ account.get_kind_display }}</li>
+      <a class="account-row" href="{% url 'ledger:account_list' %}"><span>{{ account.name }}</span><span>{{ account.get_kind_display }} · R$ {{ account.initial_balance }}</span></a>
     {% empty %}
-      <li>Nenhuma conta cadastrada.</li>
+      <div class="empty-state"><div><h2>Nenhuma conta cadastrada</h2><p>Adicione a primeira conta para começar.</p></div><a class="button" href="{% url 'ledger:account_create' %}">Adicionar conta</a></div>
     {% endfor %}
-  </ul>
-</main>
+</section>
 {% endblock %}

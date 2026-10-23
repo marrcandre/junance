@@ -14,12 +14,15 @@
     <aside class="sidebar">
       <a class="brand" href="{% url 'core:dashboard' %}"><span class="brand-mark">J</span><span>junance</span></a>
       <p class="nav-label">VISÃO GERAL</p>
-      <a class="nav-item active" href="{% url 'core:dashboard' %}">⌂ <span>Painel inicial</span></a>
+      <a class="nav-item {% if request.resolver_match.app_name == 'core' %}active{% endif %}" href="{% url 'core:dashboard' %}">⌂ <span>Painel inicial</span></a>
       <p class="nav-label">ORGANIZAÇÃO</p>
-      <div class="nav-item muted">↔ <span>Movimentações</span></div>
-      <div class="nav-item muted">▤ <span>Cartões</span></div>
-      <div class="nav-item muted">◷ <span>Planejamento</span></div>
-      <div class="nav-item muted">▥ <span>Investimentos</span></div>
+      <a class="nav-item {% if request.resolver_match.app_name == 'identity' %}active{% endif %}" href="{% url 'identity:family_list' %}">⌂ <span>Famílias</span></a>
+      <a class="nav-item {% if request.resolver_match.app_name == 'ledger' and request.resolver_match.url_name == 'account_list' %}active{% endif %}" href="{% url 'ledger:account_list' %}">▣ <span>Contas</span></a>
+      <a class="nav-item {% if request.resolver_match.app_name == 'ledger' %}active{% endif %}" href="{% url 'ledger:transaction_list' %}">↔ <span>Movimentações</span></a>
+      <a class="nav-item {% if request.resolver_match.app_name == 'cards' %}active{% endif %}" href="{% url 'cards:card_list' %}">▤ <span>Cartões</span></a>
+      <a class="nav-item {% if request.resolver_match.app_name == 'imports' %}active{% endif %}" href="{% url 'imports:upload' %}">⇩ <span>Importações</span></a>
+      <a class="nav-item {% if request.resolver_match.app_name == 'planning' %}active{% endif %}" href="{% url 'planning:monthly' %}">◷ <span>Planejamento</span></a>
+      <a class="nav-item {% if request.resolver_match.app_name == 'investments' %}active{% endif %}" href="{% url 'investments:position_list' %}">▥ <span>Investimentos</span></a>
       <div class="sidebar-footer">Junance · MVP em construção</div>
     </aside>
     <main class="main">

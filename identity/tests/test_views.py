@@ -15,7 +15,7 @@ def test_authenticated_user_can_create_family(client):
     response = client.post(reverse("identity:family_create"), {"name": "Casa"})
 
     assert response.status_code == 302
-    assert response.url == reverse("identity:family_list")
+    assert response.url == reverse("core:dashboard")
 
 
 @pytest.mark.django_db

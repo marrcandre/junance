@@ -21,5 +21,5 @@ def family_create(request):
     form = FamilyForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         create_family(request.user, form.cleaned_data["name"])
-        return redirect("identity:family_list")
+        return redirect("core:dashboard")
     return render(request, "identity/family_form.html", {"form": form})

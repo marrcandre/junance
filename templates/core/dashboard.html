@@ -3,20 +3,38 @@
 {% block title %}Início · Junance{% endblock %}
 
 {% block content %}
-<section class="welcome">
-  <p class="eyebrow">CONTROLE FINANCEIRO PESSOAL E FAMILIAR</p>
-  <h1>Uma visão mais clara do seu dinheiro.</h1>
-  <p class="lead">
-    Organize as finanças da família com clareza, consistência e tranquilidade.
-  </p>
-  <div class="notice">
-    <strong>Estamos preparando a base.</strong>
-    <p>O próximo passo é implementar famílias, membros e isolamento de dados com testes.</p>
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">PAINEL INICIAL</p>
+    <h1>{% if family %}Olá, {{ request.user.first_name|default:request.user.username }}.{% else %}Comece pelo essencial.{% endif %}</h1>
+    <p class="lead">{% if family %}Acompanhe o dinheiro de {{ family.name }} em um só lugar.{% else %}Configure sua primeira família para começar a organizar suas finanças.{% endif %}</p>
   </div>
+  {% if family and accounts %}<a class="button" href="{% url 'ledger:transaction_create' %}">Novo lançamento</a>{% endif %}
 </section>
-<section class="cards" aria-label="Módulos planejados">
-  <article class="module-card"><span>01</span><h2>Movimentações</h2><p>Receitas, despesas e transferências.</p></article>
-  <article class="module-card"><span>02</span><h2>Cartões</h2><p>Compras, faturas e parcelamentos.</p></article>
-  <article class="module-card"><span>03</span><h2>Planejamento</h2><p>Orçamentos e acompanhamento mensal.</p></article>
-</section>
+
+{% if not family %}
+  <section class="empty-state">
+    <span class="step-number">1</span>
+    <div><h2>Crie sua primeira família</h2><p>Uma família organiza contas e lançamentos com isolamento e segurança.</p></div>
+    {% if user.is_authenticated %}<a class="button" href="{% url 'identity:family_create' %}">Criar família</a>{% else %}<a class="button" href="{% url 'admin:login' %}?next={% url 'core:dashboard' %}">Entrar</a>{% endif %}
+  </section>
+{% elif not accounts %}
+  <section class="empty-state">
+    <span class="step-number">2</span>
+    <div><h2>Cadastre sua primeira conta</h2><p>Adicione uma conta corrente, poupança ou carteira para acompanhar seu saldo.</p></div>
+    <a class="button" href="{% url 'ledger:account_create' %}">Adicionar conta</a>
+  </section>
+{% else %}
+  <section class="summary-grid" aria-label="Resumo do mês">
+    <article class="summary-card"><span>Receitas do mês</span><strong>R$ {{ summary.income }}</strong></article>
+    <article class="summary-card"><span>Despesas do mês</span><strong>R$ {{ summary.expense }}</strong></article>
+    <article class="summary-card"><span>Saldo do mês</span><strong>R$ {{ summary.balance }}</strong></article>
+  </section>
+  <section class="content-section">
+    <div class="section-heading"><div><p class="eyebrow">CONTAS ATIVAS</p><h2>Onde está seu dinheiro</h2></div><a href="{% url 'ledger:account_list' %}">Ver todas</a></div>
+    <div class="account-list">
+      {% for account in accounts %}<a class="account-row" href="{% url 'ledger:account_list' %}"><span>{{ account.name }}</span><span>{{ account.get_kind_display }}</span></a>{% endfor %}
+    </div>
+  </section>
+{% endif %}
 {% endblock %}

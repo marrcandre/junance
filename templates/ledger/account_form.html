@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Nova conta · Junance{% endblock %}
+
+{% block content %}
+<section class="page-heading">
+  <div><p class="eyebrow">CONFIGURAÇÃO INICIAL</p><h1>Adicionar conta</h1><p class="lead">Cadastre uma conta de {{ family.name }} para acompanhar seus saldos.</p></div>
+</section>
+<section class="form-card">
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <div class="form-actions"><a href="{% url 'core:dashboard' %}">Cancelar</a><button class="button" type="submit">Salvar conta</button></div>
+  </form>
+</section>
+{% endblock %}

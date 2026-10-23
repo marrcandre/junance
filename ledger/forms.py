@@ -3,6 +3,15 @@ from django import forms
 from ledger.models import Account, Category
 
 
+class AccountForm(forms.ModelForm):
+    class Meta:
+        model = Account
+        fields = ["name", "kind", "initial_balance"]
+        widgets = {
+            "initial_balance": forms.NumberInput(attrs={"step": "0.01", "min": "0"}),
+        }
+
+
 class TransactionForm(forms.Form):
     kind = forms.ChoiceField(
         choices=[("expense", "Despesa"), ("income", "Receita")],

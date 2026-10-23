@@ -171,6 +171,22 @@ Não executamos migrações automaticamente durante o build/deploy: isso evita a
 
 ## 8. Próximas etapas
 
+### Primeiro acesso
+
+Depois de criar o superusuário, acesse `/admin/` para entrar. A página inicial
+orienta o usuário autenticado em três estados: criar uma família, criar a
+primeira conta e, quando já houver dados, consultar o resumo mensal. A
+navegação lateral oferece links para todos os módulos implementados.
+
+O fluxo mínimo para começar é:
+
+1. Criar uma família em `/families/new/`.
+2. Adicionar uma conta em `/ledger/accounts/new/`.
+3. Registrar o primeiro lançamento em `/ledger/transactions/new/`.
+
+O dashboard não cria dados fictícios automaticamente; os dados iniciais são
+cadastrados explicitamente pelo usuário.
+
 1. Endurecimento de autenticação, sessões e segurança de produção.
 2. Conciliação financeira e correções assistidas.
 3. Melhorias de UX, filtros e relatórios.

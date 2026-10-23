@@ -2,10 +2,10 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 
 from identity.services import get_active_family
-from ledger.forms import TransactionForm
+from ledger.forms import AccountForm, TransactionForm
 from ledger.models import Account
 from ledger.queries import family_expenses
-from ledger.services import record_expense, record_income
+from ledger.services import create_account, record_expense, record_income
 
 
 def _family_or_redirect(request):
@@ -20,6 +20,23 @@ def account_list(request):
         return family
     accounts = Account.objects.filter(family=family, active=True)
     return render(request, "ledger/account_list.html", {"family": family, "accounts": accounts})
+
+
+@login_required
+def account_create(request):
+    family = _family_or_redirect(request)
+    if not hasattr(family, "id"):
+        return family
+    form = AccountForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        create_account(
+            family,
+            form.cleaned_data["name"],
+            kind=form.cleaned_data["kind"],
+            initial_balance=form.cleaned_data["initial_balance"],
+        )
+        return redirect("core:dashboard")
+    return render(request, "ledger/account_form.html", {"family": family, "form": form})
 
 
 @login_required
