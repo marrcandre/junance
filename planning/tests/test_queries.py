@@ -4,6 +4,8 @@ from decimal import Decimal
 import pytest
 from django.contrib.auth import get_user_model
 
+from cards.models import Card
+from cards.services import record_card_purchase
 from identity.services import create_family
 from ledger.models import Category
 from ledger.services import (
@@ -154,4 +156,76 @@ def test_monthly_report_returns_only_detailed_entries_from_selected_month():
     assert [expense.description for expense in report["expenses"]] == ["Feira de fevereiro"]
     assert list(report["expense_categories"]) == [
         {"category__name": "Mercado", "total": Decimal("40.00")}
+    ]
+
+
+@pytest.mark.django_db
+def test_monthly_report_contains_transfers_and_invoices_without_counting_them():
+    user = User.objects.create_user(username="ana")
+    family = create_family(user, "Casa")
+    account = create_account(family, "Conta")
+    destination = create_account(family, "Poupança")
+    expense_category = create_category(family, "Mercado", kind=Category.Kind.EXPENSE)
+    transfer = record_transfer(
+        user,
+        family,
+        account,
+        destination,
+        Decimal("80.00"),
+        transaction_date=date(2026, 2, 4),
+        competence_date=date(2026, 2, 1),
+        description="Reserva",
+    )
+    card = Card.objects.create(family=family, name="Cartão", last_four="1234")
+    purchase = record_card_purchase(
+        user, family, card, expense_category, Decimal("120.00"), purchase_date=date(2026, 2, 5)
+    )
+
+    report = monthly_report(family, date(2026, 2, 1))
+
+    assert [item.pk for item in report["transfers"]] == [transfer.pk]
+    assert [invoice.card.name for invoice in report["invoices"]] == ["Cartão"]
+    assert report["invoices"][0].total_open == Decimal("120.00")
+    assert report["summary"]["expense"] == Decimal("0.00")
+    assert purchase.installments.count() == 1
+
+
+@pytest.mark.django_db
+def test_monthly_report_contains_only_family_budgets_for_selected_competence():
+    user = User.objects.create_user(username="ana")
+    other_user = User.objects.create_user(username="bruno")
+    family = create_family(user, "Casa")
+    other_family = create_family(other_user, "Outra")
+    category = create_category(family, "Mercado", kind=Category.Kind.EXPENSE)
+    other_category = create_category(other_family, "Mercado", kind=Category.Kind.EXPENSE)
+    budget = Budget.objects.create(
+        family=family, category=category, amount=Decimal("100.00"), competence_date=date(2026, 2, 1)
+    )
+    Budget.objects.create(
+        family=other_family,
+        category=other_category,
+        amount=Decimal("999.00"),
+        competence_date=date(2026, 2, 1),
+    )
+    account = create_account(family, "Conta")
+    record_expense(
+        user,
+        family,
+        account,
+        category,
+        Decimal("35.00"),
+        transaction_date=date(2026, 2, 10),
+        competence_date=date(2026, 2, 1),
+    )
+
+    rows = monthly_report(family, date(2026, 2, 1))["budgets"]
+
+    assert rows == [
+        {
+            "budget": budget,
+            "category": category,
+            "planned": Decimal("100.00"),
+            "realized": Decimal("35.00"),
+            "balance": Decimal("65.00"),
+        }
     ]

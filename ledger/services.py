@@ -3,6 +3,8 @@ from decimal import Decimal
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
 
+from audit.models import AuditEvent
+from audit.services import cancel_event, record_audit_event
 from identity.services import require_family_membership
 from ledger.models import Account, Category, Expense, Income, Transfer
 
@@ -46,6 +48,64 @@ def _ensure_event_inputs(actor, family, account, category, amount, expected_kind
     if category.kind != expected_kind:
         raise ValidationError("A categoria não corresponde ao tipo da movimentação.")
     return _ensure_amount(amount)
+
+
+def _event_snapshot(event):
+    return {
+        "account_id": event.account_id,
+        "category_id": event.category_id,
+        "amount": str(event.amount),
+        "transaction_date": event.transaction_date.isoformat(),
+        "competence_date": event.competence_date.isoformat(),
+        "paid_at": event.paid_at.isoformat() if event.paid_at else None,
+        "description": event.description,
+        "is_void": event.is_void,
+    }
+
+
+def _update_event(
+    actor,
+    event,
+    *,
+    account,
+    category,
+    amount,
+    transaction_date,
+    competence_date,
+    description,
+    paid_at,
+    expected_kind,
+):
+    require_family_membership(actor, event.family)
+    if event.is_void:
+        raise ValidationError("Um lançamento cancelado não pode ser alterado.")
+    amount = _ensure_event_inputs(
+        actor,
+        event.family,
+        account,
+        category,
+        amount,
+        expected_kind,
+    )
+    before = _event_snapshot(event)
+    event.account = account
+    event.category = category
+    event.amount = amount
+    event.transaction_date = transaction_date
+    event.competence_date = competence_date
+    event.description = description
+    event.paid_at = paid_at
+    event.full_clean()
+    event.save()
+    record_audit_event(
+        actor,
+        event.family,
+        AuditEvent.Action.UPDATE,
+        event,
+        before=before,
+        after=_event_snapshot(event),
+    )
+    return event
 
 
 @transaction.atomic
@@ -104,6 +164,71 @@ def record_expense(
     expense.full_clean()
     expense.save()
     return expense
+
+
+@transaction.atomic
+def update_income(
+    actor,
+    income,
+    *,
+    account,
+    category,
+    amount,
+    transaction_date,
+    competence_date,
+    description="",
+    paid_at=None,
+):
+    if not isinstance(income, Income):
+        raise ValidationError("O evento não é uma receita.")
+    return _update_event(
+        actor,
+        income,
+        account=account,
+        category=category,
+        amount=amount,
+        transaction_date=transaction_date,
+        competence_date=competence_date,
+        description=description,
+        paid_at=paid_at,
+        expected_kind=Category.Kind.INCOME,
+    )
+
+
+@transaction.atomic
+def update_expense(
+    actor,
+    expense,
+    *,
+    account,
+    category,
+    amount,
+    transaction_date,
+    competence_date,
+    description="",
+    paid_at=None,
+):
+    if not isinstance(expense, Expense):
+        raise ValidationError("O evento não é uma despesa.")
+    return _update_event(
+        actor,
+        expense,
+        account=account,
+        category=category,
+        amount=amount,
+        transaction_date=transaction_date,
+        competence_date=competence_date,
+        description=description,
+        paid_at=paid_at,
+        expected_kind=Category.Kind.EXPENSE,
+    )
+
+
+@transaction.atomic
+def cancel_financial_event(actor, event, *, reason):
+    if not isinstance(event, (Income, Expense)):
+        raise ValidationError("O evento não é uma receita ou despesa.")
+    return cancel_event(actor, event, reason=reason)
 
 
 @transaction.atomic

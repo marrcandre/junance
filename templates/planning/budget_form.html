@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% block title %}{{ form_title }} · Junance{% endblock %}
 {% block content %}
-<main><h1>Planejar {{ family.name }}</h1><p>Selecione uma categoria para criar um orçamento.</p></main>
+<section class="page-heading"><div><p class="eyebrow">PLANEJAMENTO</p><h1>{{ form_title }}</h1><p class="lead">Defina o limite de uma categoria para a competência selecionada.</p></div></section>
+{% include "planning/_budget_form.html" %}
 {% endblock %}

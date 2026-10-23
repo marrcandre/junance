@@ -1,48 +1,92 @@
 {% extends "base.html" %}
 
+{% block title %}Planejamento · Junance{% endblock %}
+
 {% block content %}
+{% if messages %}<div class="messages" aria-live="polite">{% for message in messages %}<p class="message message-{{ message.tags }}">{{ message }}</p>{% endfor %}</div>{% endif %}
 <section class="page-heading">
   <div>
-    <p class="eyebrow">VISÃO MENSAL</p>
+    <p class="eyebrow">PLANEJAMENTO MENSAL</p>
     <h1>Resumo mensal · {{ month_label }}</h1>
-    <p class="lead">Entradas e despesas da família {{ family.name }} na competência selecionada.</p>
+    <p class="lead">Confira e ajuste as entradas e saídas da família {{ family.name }}.</p>
   </div>
   <form class="month-picker" method="get">
-    <label for="month">Escolher mês</label>
+    <label for="month">Competência</label>
     <input id="month" type="month" name="month" value="{{ competence|date:'Y-m' }}">
     <button class="button" type="submit">Atualizar</button>
   </form>
 </section>
 
-<section class="summary-grid" aria-label="Totais do mês">
-  <article class="summary-card"><span>Entradas</span><strong>R$ {{ summary.income }}</strong></article>
-  <article class="summary-card"><span>Despesas</span><strong>R$ {{ summary.expense }}</strong></article>
-  <article class="summary-card"><span>Sobra do mês</span><strong>R$ {{ summary.balance }}</strong></article>
+<section class="content-section" aria-labelledby="budget-heading">
+  <div class="section-heading">
+    <div><p class="eyebrow">PLANEJAMENTO</p><h2 id="budget-heading">Orçamento por categoria</h2></div>
+    <a class="button button-small" href="{% url 'planning:budget_create' %}?month={{ competence|date:'Y-m' }}" hx-get="{% url 'planning:budget_create' %}?month={{ competence|date:'Y-m' }}" hx-target="#budget-dialog" hx-swap="innerHTML">Novo orçamento</a>
+  </div>
+  <div class="transaction-table-wrap">
+    <table class="transaction-table budget-table">
+      <thead><tr><th>Categoria</th><th class="numeric">Planejado</th><th class="numeric">Realizado</th><th class="numeric">Saldo</th><th><span class="visually-hidden">Ações</span></th></tr></thead>
+      <tbody>
+        {% for row in report.budgets %}<tr>
+          <td data-label="Categoria"><strong>{{ row.category.name }}</strong></td>
+          <td data-label="Planejado" class="numeric">R$ {{ row.planned|floatformat:2 }}</td>
+          <td data-label="Realizado" class="numeric amount-expense">R$ {{ row.realized|floatformat:2 }}</td>
+          <td data-label="Saldo" class="numeric">R$ {{ row.balance|floatformat:2 }}</td>
+          <td class="row-actions">{% if row.budget %}<a class="text-button" href="{% url 'planning:budget_edit' pk=row.budget.pk %}?month={{ competence|date:'Y-m' }}" hx-get="{% url 'planning:budget_edit' pk=row.budget.pk %}?month={{ competence|date:'Y-m' }}" hx-target="#budget-dialog" hx-swap="innerHTML">Editar</a><form method="post" action="{% url 'planning:budget_delete' pk=row.budget.pk %}?month={{ competence|date:'Y-m' }}">{% csrf_token %}<input type="hidden" name="reason" value="Excluído na tela de planejamento"><button class="text-button danger" type="submit">Excluir</button></form>{% else %}<span class="muted">—</span>{% endif %}</td>
+        </tr>{% empty %}<tr><td colspan="5" class="empty-inline">Nenhuma categoria planejada ou realizada neste mês.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
 </section>
 
-<section class="monthly-layout">
-  <article class="content-section">
-    <div class="section-heading"><div><p class="eyebrow">ENTRADAS</p><h2>Receitas do mês</h2></div><span>{{ report.incomes|length }} lançamentos</span></div>
-    <div class="transaction-list">
-      {% for income in report.incomes %}
-        <div class="transaction-row"><div><strong>{{ income.description|default:income.category.name }}</strong><small>{{ income.transaction_date|date:"d/m/Y" }} · {{ income.account.name }}</small></div><strong class="amount-positive">R$ {{ income.amount }}</strong></div>
-      {% empty %}<div class="empty-inline">Nenhuma entrada registrada neste mês.</div>{% endfor %}
+<section class="summary-grid" aria-label="Totais do mês">
+  <article class="summary-card"><span>Entradas</span><strong class="amount-positive">R$ {{ summary.income|floatformat:2 }}</strong></article>
+  <article class="summary-card"><span>Saídas</span><strong class="amount-negative">R$ {{ summary.expense|floatformat:2 }}</strong></article>
+  <article class="summary-card"><span>Saldo do mês</span><strong>R$ {{ summary.balance|floatformat:2 }}</strong></article>
+</section>
+
+<section class="content-section transaction-section" aria-labelledby="income-heading">
+  <div class="section-heading">
+    <div><p class="eyebrow">ENTRADAS</p><h2 id="income-heading">Entradas do mês</h2></div>
+    <div class="section-actions">
+      <span>{{ report.incomes|length }} lançamentos</span>
+      <a class="button button-small" href="{% url 'planning:transaction_create' kind='income' %}?month={{ competence|date:'Y-m' }}" hx-get="{% url 'planning:transaction_create' kind='income' %}?month={{ competence|date:'Y-m' }}" hx-target="#transaction-dialog" hx-swap="innerHTML">Nova entrada</a>
     </div>
-  </article>
-  <article class="content-section">
-    <div class="section-heading"><div><p class="eyebrow">SAÍDAS</p><h2>Despesas do mês</h2></div><span>{{ report.expenses|length }} lançamentos</span></div>
-    <div class="transaction-list">
-      {% for expense in report.expenses %}
-        <div class="transaction-row"><div><strong>{{ expense.description|default:expense.category.name }}</strong><small>{{ expense.transaction_date|date:"d/m/Y" }} · {{ expense.account.name }}</small></div><strong class="amount-negative">R$ {{ expense.amount }}</strong></div>
-      {% empty %}<div class="empty-inline">Nenhuma despesa registrada neste mês.</div>{% endfor %}
+  </div>
+  {% include "planning/_transaction_table.html" with transactions=report.incomes kind="income" empty_message="Nenhuma entrada registrada neste mês." %}
+</section>
+
+<section class="content-section transaction-section" aria-labelledby="expense-heading">
+  <div class="section-heading">
+    <div><p class="eyebrow">SAÍDAS</p><h2 id="expense-heading">Saídas do mês</h2></div>
+    <div class="section-actions">
+      <span>{{ report.expenses|length }} lançamentos</span>
+      <a class="button button-small" href="{% url 'planning:transaction_create' kind='expense' %}?month={{ competence|date:'Y-m' }}" hx-get="{% url 'planning:transaction_create' kind='expense' %}?month={{ competence|date:'Y-m' }}" hx-target="#transaction-dialog" hx-swap="innerHTML">Nova saída</a>
     </div>
-  </article>
+  </div>
+  {% include "planning/_transaction_table.html" with transactions=report.expenses kind="expense" empty_message="Nenhuma saída registrada neste mês." %}
 </section>
 
 <section class="content-section">
-  <div class="section-heading"><div><p class="eyebrow">DISTRIBUIÇÃO</p><h2>Despesas por categoria</h2></div></div>
+  <div class="section-heading"><div><p class="eyebrow">DISTRIBUIÇÃO</p><h2>Saídas por categoria</h2></div></div>
   <div class="category-list">
-    {% for category in report.expense_categories %}<div class="category-row"><span>{{ category.category__name }}</span><strong>R$ {{ category.total }}</strong></div>{% empty %}<div class="empty-inline">Nenhuma categoria neste mês.</div>{% endfor %}
+    {% for category in report.expense_categories %}<div class="category-row"><span>{{ category.category__name }}</span><strong>R$ {{ category.total|floatformat:2 }}</strong></div>{% empty %}<div class="empty-inline">Nenhuma categoria neste mês.</div>{% endfor %}
   </div>
 </section>
+
+<section class="content-section" aria-labelledby="transfer-heading">
+  <div class="section-heading"><div><p class="eyebrow">MOVIMENTAÇÃO NEUTRA</p><h2 id="transfer-heading">Transferências entre contas</h2></div></div>
+  <div class="transaction-table-wrap"><table class="transaction-table"><thead><tr><th>Data</th><th>Origem</th><th>Destino</th><th>Descrição</th><th class="numeric">Valor</th></tr></thead><tbody>
+    {% for transfer in report.transfers %}<tr><td data-label="Data">{{ transfer.transaction_date|date:"d/m/Y" }}</td><td data-label="Origem">{{ transfer.source_account.name }}</td><td data-label="Destino">{{ transfer.destination_account.name }}</td><td data-label="Descrição">{{ transfer.description|default:"Transferência entre contas" }}</td><td data-label="Valor" class="numeric">R$ {{ transfer.amount|floatformat:2 }}</td></tr>{% empty %}<tr><td colspan="5" class="empty-inline">Nenhuma transferência neste mês.</td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+
+<section class="content-section" aria-labelledby="invoice-heading">
+  <div class="section-heading"><div><p class="eyebrow">OBRIGAÇÕES</p><h2 id="invoice-heading">Faturas de cartão</h2></div></div>
+  <div class="transaction-table-wrap"><table class="transaction-table"><thead><tr><th>Cartão</th><th>Vencimento</th><th>Status</th><th class="numeric">Total em aberto</th></tr></thead><tbody>
+    {% for invoice in report.invoices %}<tr><td data-label="Cartão"><strong>{{ invoice.card.name }}</strong></td><td data-label="Vencimento">{{ invoice.due_date|date:"d/m/Y" }}</td><td data-label="Status">{{ invoice.get_status_display }}</td><td data-label="Total em aberto" class="numeric">R$ {{ invoice.total_open|floatformat:2 }}</td></tr>{% empty %}<tr><td colspan="4" class="empty-inline">Nenhuma fatura nesta competência.</td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+
+<dialog id="transaction-dialog" class="transaction-dialog"></dialog>
+<dialog id="budget-dialog" class="transaction-dialog"></dialog>
 {% endblock %}

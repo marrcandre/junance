@@ -1,0 +1,9 @@
+<form class="transaction-form" method="post" action="{{ request.get_full_path }}" hx-post="{{ request.get_full_path }}" hx-target="#transaction-dialog" hx-swap="innerHTML">
+  {% csrf_token %}
+  <div class="dialog-heading"><div><p class="eyebrow">{{ kind|upper }}</p><h2>{{ form_title }}</h2></div><button class="dialog-close" type="button" onclick="this.closest('dialog')?.close()" aria-label="Fechar">×</button></div>
+  {{ form.non_field_errors }}
+  {% for field in form %}
+    <p><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{{ field.errors }}</p>
+  {% endfor %}
+  <div class="form-actions"><a href="{% url 'planning:monthly' %}?month={{ competence|date:'Y-m' }}">Cancelar</a><button class="button" type="submit">Salvar lançamento</button></div>
+</form>

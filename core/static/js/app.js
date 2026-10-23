@@ -19,4 +19,11 @@
     setCollapsed(collapsed);
     window.localStorage.setItem(storageKey, String(collapsed));
   });
+
+  document.body.addEventListener("htmx:afterSwap", (event) => {
+    const target = event.detail.target;
+    if (target instanceof HTMLDialogElement && target.id.endsWith("-dialog")) {
+      target.showModal();
+    }
+  });
 })();

@@ -1,0 +1,35 @@
+<div class="transaction-table-wrap">
+  <table class="transaction-table">
+    <thead>
+      <tr>
+        <th scope="col">Data</th>
+        <th scope="col">Descrição</th>
+        <th scope="col">Categoria</th>
+        <th scope="col">Conta</th>
+        <th scope="col" class="numeric">Valor</th>
+        <th scope="col"><span class="visually-hidden">Ações</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for transaction in transactions %}
+      <tr>
+        <td data-label="Data">{{ transaction.transaction_date|date:"d/m/Y" }}</td>
+        <td data-label="Descrição"><strong>{{ transaction.description|default:transaction.category.name }}</strong></td>
+        <td data-label="Categoria">{{ transaction.category.name }}</td>
+        <td data-label="Conta">{{ transaction.account.name }}</td>
+        <td data-label="Valor" class="numeric amount-{{ kind }}">R$ {{ transaction.amount|floatformat:2 }}</td>
+        <td class="row-actions">
+          <a class="text-button" href="{% url 'planning:transaction_edit' kind=kind pk=transaction.pk %}?month={{ competence|date:'Y-m' }}" hx-get="{% url 'planning:transaction_edit' kind=kind pk=transaction.pk %}?month={{ competence|date:'Y-m' }}" hx-target="#transaction-dialog" hx-swap="innerHTML">Editar</a>
+          <form method="post" action="{% url 'planning:transaction_cancel' kind=kind pk=transaction.pk %}?month={{ competence|date:'Y-m' }}" onsubmit="return confirm('Cancelar este lançamento? Ele será preservado no histórico.');">
+            {% csrf_token %}
+            <input type="hidden" name="reason" value="Cancelado na tela de planejamento">
+            <button class="text-button danger" type="submit">Cancelar</button>
+          </form>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" class="empty-inline">{{ empty_message }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

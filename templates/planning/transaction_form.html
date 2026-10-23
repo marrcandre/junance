@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}{{ form_title }} · Junance{% endblock %}
+
+{% block content %}
+<section class="page-heading">
+  <div><p class="eyebrow">PLANEJAMENTO MENSAL</p><h1>{{ form_title }}</h1><p class="lead">Atualize os dados do lançamento com segurança.</p></div>
+</section>
+<div class="form-card transaction-form-card">
+  {% include "planning/_transaction_form.html" %}
+</div>
+{% endblock %}
