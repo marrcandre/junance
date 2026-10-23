@@ -4,7 +4,7 @@ Controle financeiro pessoal e familiar.
 
 O Junance será desenvolvido incrementalmente com Django, Django Templates, HTMX e PostgreSQL. O ambiente Python usa **uv** para dependências e ambientes virtuais; o **Makefile** fornece comandos padronizados; o **Docker Compose** executa apenas o PostgreSQL localmente.
 
-> Estado atual: fundação técnica concluída e tela inicial disponível. Ainda não há movimentações, cartões, famílias, autenticação própria nem importação financeira implementados.
+> Estado atual: fundação técnica e primeira fatia financeira implementadas, com famílias, contas, movimentações, cartões, importações revisáveis, planejamento e investimentos. O produto ainda precisa de endurecimento operacional antes de dados reais.
 
 ## Stack
 
@@ -171,12 +171,10 @@ Não executamos migrações automaticamente durante o build/deploy: isso evita a
 
 ## 8. Próximas etapas
 
-1. Fundação e execução local.
-2. Famílias, membros e isolamento de dados com testes.
-3. Contas, categorias, receitas, despesas e transferências.
-4. Cartões, faturas e parcelamentos sem dupla contabilização.
-5. Painel mensal e planejamento.
-6. Auditoria/importação das planilhas históricas.
-7. Investimentos e rentabilidade.
+1. Endurecimento de autenticação, sessões e segurança de produção.
+2. Conciliação financeira e correções assistidas.
+3. Melhorias de UX, filtros e relatórios.
+4. Validação de formatos reais anonimizados e suporte posterior a PDF.
+5. Backup, restauração e procedimento de deploy controlado.
 
 A modelagem financeira e a importação só avançarão após validar as regras de negócio e as exceções das planilhas.

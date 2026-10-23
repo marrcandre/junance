@@ -15,7 +15,7 @@ domínio.
 
 ## Etapa 2 — Autenticação, famílias e permissões
 
-Estado: próxima.
+Estado: concluída.
 
 - Usuários e autenticação.
 - Famílias, membros e papéis.
@@ -24,6 +24,8 @@ Estado: próxima.
 
 ## Etapa 3 — Contas e movimentações
 
+Estado: concluída.
+
 - Contas bancárias e categorias.
 - Receitas, despesas e transferências.
 - Saldos e datas com semântica definida.
@@ -31,11 +33,15 @@ Estado: próxima.
 
 ## Etapa 4 — Cartões e faturas
 
+Estado: concluída.
+
 - Compras, parcelamentos e faturas.
 - Pagamentos e conciliação.
 - Garantia de que uma compra e seu pagamento não dupliquem despesas.
 
 ## Etapa 5 — Importação
+
+Estado: concluída para CSV, OFX e XLSX revisáveis; PDF permanece posterior.
 
 - OFX, CSV e XLSX.
 - Normalização por instituição.
@@ -43,6 +49,8 @@ Estado: próxima.
 - PDFs posteriormente, com conferência reforçada.
 
 ## Etapa 6 — Planejamento, relatórios e investimentos
+
+Estado: concluída na primeira fatia funcional.
 
 - Orçamentos e acompanhamento mensal.
 - Dashboard financeiro baseado em dados confiáveis.
