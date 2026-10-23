@@ -77,3 +77,7 @@ def test_dashboard_navigation_contains_links_to_main_modules(client):
         "investments:position_list",
     ):
         assert reverse(route_name) in content
+
+    assert 'id="sidebar-toggle"' in content
+    assert "data-sidebar-toggle" in content
+    assert "static/js/app.js" in content
