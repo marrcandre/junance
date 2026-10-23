@@ -68,3 +68,15 @@ def test_monthly_report_page_shows_selected_month_entries_only(client):
     assert "Despesa selecionada" in content
     assert "Despesa de outro mês" not in content
     assert "Fevereiro de 2026" in content
+
+
+@pytest.mark.django_db
+def test_monthly_report_accepts_month_picker_format(client):
+    user = User.objects.create_user(username="ana")
+    create_family(user, "Casa")
+    client.force_login(user)
+
+    response = client.get(reverse("planning:monthly"), {"month": "2026-02"})
+
+    assert response.status_code == 200
+    assert "Fevereiro de 2026" in response.content.decode()

@@ -24,6 +24,8 @@ MONTH_NAMES = (
 
 def _month(value):
     try:
+        if value and len(value) == 7:
+            value = f"{value}-01"
         parsed = date.fromisoformat(value)
     except TypeError, ValueError:
         return date.today().replace(day=1)
