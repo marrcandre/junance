@@ -4,7 +4,7 @@ Controle financeiro pessoal e familiar.
 
 O Junance será desenvolvido incrementalmente com Django, Django Templates, HTMX e PostgreSQL. O ambiente Python usa **uv** para dependências e ambientes virtuais; o **Makefile** fornece comandos padronizados; o **Docker Compose** executa apenas o PostgreSQL localmente.
 
-> Estado atual: fundação técnica e tela inicial. Ainda não há movimentações, cartões, famílias, autenticação própria nem importação financeira implementados.
+> Estado atual: fundação técnica concluída e tela inicial disponível. Ainda não há movimentações, cartões, famílias, autenticação própria nem importação financeira implementados.
 
 ## Stack
 
@@ -104,6 +104,18 @@ make db-shell
 | `make up` | Inicia o PostgreSQL em container |
 
 Consulte `make help` para a lista completa.
+
+## Convenções de desenvolvimento
+
+O desenvolvimento segue fatias verticais por domínio. Famílias e permissões
+serão implementadas antes dos dados financeiros; cada etapa deve incluir
+testes de autorização e isolamento quando houver dados pertencentes a uma
+família.
+
+Regras que produzem efeitos financeiros relacionados devem ficar em serviços
+transacionais, e não somente em views ou templates. Use `Decimal` para
+dinheiro, mantenha dados de teste anonimizados e revise as decisões em `.ai/`
+antes de alterar domínio, banco, importações ou permissões.
 
 ## 4. Subir para o GitHub
 

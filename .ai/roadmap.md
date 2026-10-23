@@ -2,14 +2,20 @@
 
 ## Etapa 1 — Fundação técnica
 
-Estado: em andamento.
+Estado: concluída.
 
 - Django, Python, `uv`, PostgreSQL e Makefile.
 - Templates, HTMX e CSS inicial.
 - CI, testes e Ruff.
 - Documentação operacional e decisões de engenharia.
 
+Critério de saída: a aplicação possui comandos reproduzíveis, CI, testes,
+lint, PostgreSQL local isolado e convenções registradas para os módulos de
+domínio.
+
 ## Etapa 2 — Autenticação, famílias e permissões
+
+Estado: próxima.
 
 - Usuários e autenticação.
 - Famílias, membros e papéis.
