@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<main>
+  <h1>Movimentações de {{ family.name }}</h1>
+  <a href="{% url 'ledger:transaction_create' %}">Novo lançamento</a>
+  <ul>
+    {% for expense in expenses %}
+      <li>{{ expense.transaction_date }} — {{ expense.description }} — {{ expense.amount }}</li>
+    {% empty %}
+      <li>Nenhuma despesa cadastrada.</li>
+    {% endfor %}
+  </ul>
+</main>
+{% endblock %}

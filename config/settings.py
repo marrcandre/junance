@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     "django_htmx",
     "core",
     "identity",
+    "ledger",
 ]
 
 MIDDLEWARE = [

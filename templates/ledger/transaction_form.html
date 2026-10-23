@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+<main>
+  <h1>Novo lançamento em {{ family.name }}</h1>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Salvar lançamento</button>
+  </form>
+</main>
+{% endblock %}

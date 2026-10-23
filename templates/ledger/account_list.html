@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+<main>
+  <h1>Contas de {{ family.name }}</h1>
+  <ul>
+    {% for account in accounts %}
+      <li>{{ account.name }} — {{ account.get_kind_display }}</li>
+    {% empty %}
+      <li>Nenhuma conta cadastrada.</li>
+    {% endfor %}
+  </ul>
+</main>
+{% endblock %}
