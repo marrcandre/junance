@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+<main>
+  <h1>Investimentos de {{ family.name }}</h1>
+  <ul>
+    {% for position in positions %}
+      <li>{{ position.asset_name }} — {{ position.quantity }} — custo {{ position.cost_basis }}</li>
+    {% empty %}
+      <li>Nenhuma posição cadastrada.</li>
+    {% endfor %}
+  </ul>
+</main>
+{% endblock %}

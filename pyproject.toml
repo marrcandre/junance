@@ -24,7 +24,7 @@ dev = [
 ]
 
 [tool.setuptools.packages.find]
-include = ["config*", "core*", "identity*", "ledger*", "audit*", "cards*", "imports*", "planning*"]
+include = ["config*", "core*", "identity*", "ledger*", "audit*", "cards*", "imports*", "planning*", "investments*"]
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "config.settings"
