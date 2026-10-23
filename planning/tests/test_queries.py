@@ -14,7 +14,7 @@ from ledger.services import (
     record_transfer,
 )
 from planning.models import Budget
-from planning.queries import budget_progress, monthly_summary
+from planning.queries import budget_progress, monthly_report, monthly_summary
 
 User = get_user_model()
 
@@ -108,3 +108,50 @@ def test_budget_progress_is_scoped_to_family_and_competence():
         "spent": Decimal("40.00"),
         "remaining": Decimal("60.00"),
     }
+
+
+@pytest.mark.django_db
+def test_monthly_report_returns_only_detailed_entries_from_selected_month():
+    user = User.objects.create_user(username="ana")
+    family = create_family(user, "Casa")
+    account = create_account(family, "Conta")
+    expense_category = create_category(family, "Mercado", kind=Category.Kind.EXPENSE)
+    income_category = create_category(family, "Salário", kind=Category.Kind.INCOME)
+    record_income(
+        user,
+        family,
+        account,
+        income_category,
+        Decimal("100.00"),
+        transaction_date=date(2026, 2, 5),
+        competence_date=date(2026, 2, 1),
+        description="Salário de fevereiro",
+    )
+    record_expense(
+        user,
+        family,
+        account,
+        expense_category,
+        Decimal("40.00"),
+        transaction_date=date(2026, 2, 10),
+        competence_date=date(2026, 2, 1),
+        description="Feira de fevereiro",
+    )
+    record_expense(
+        user,
+        family,
+        account,
+        expense_category,
+        Decimal("20.00"),
+        transaction_date=date(2026, 1, 10),
+        competence_date=date(2026, 1, 1),
+        description="Feira de janeiro",
+    )
+
+    report = monthly_report(family, date(2026, 2, 1))
+
+    assert [income.description for income in report["incomes"]] == ["Salário de fevereiro"]
+    assert [expense.description for expense in report["expenses"]] == ["Feira de fevereiro"]
+    assert list(report["expense_categories"]) == [
+        {"category__name": "Mercado", "total": Decimal("40.00")}
+    ]

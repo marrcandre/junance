@@ -4,7 +4,22 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 
 from identity.services import get_active_family
-from planning.queries import monthly_summary
+from planning.queries import monthly_report
+
+MONTH_NAMES = (
+    "janeiro",
+    "fevereiro",
+    "março",
+    "abril",
+    "maio",
+    "junho",
+    "julho",
+    "agosto",
+    "setembro",
+    "outubro",
+    "novembro",
+    "dezembro",
+)
 
 
 def _month(value):
@@ -21,13 +36,16 @@ def monthly(request):
     if family is None:
         return redirect("identity:family_list")
     competence = _month(request.GET.get("month"))
+    report = monthly_report(family, competence)
     return render(
         request,
         "planning/monthly.html",
         {
             "family": family,
             "competence": competence,
-            "summary": monthly_summary(family, competence),
+            "summary": report["summary"],
+            "report": report,
+            "month_label": f"{MONTH_NAMES[competence.month - 1].capitalize()} de {competence.year}",
         },
     )
 
