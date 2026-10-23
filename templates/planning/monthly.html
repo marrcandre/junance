@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+<main>
+  <h1>Resumo mensal de {{ family.name }}</h1>
+  <p>Competência: {{ competence }}</p>
+  <dl>
+    <dt>Receitas</dt><dd>{{ summary.income }}</dd>
+    <dt>Despesas</dt><dd>{{ summary.expense }}</dd>
+    <dt>Saldo</dt><dd>{{ summary.balance }}</dd>
+  </dl>
+</main>
+{% endblock %}

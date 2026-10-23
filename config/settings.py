@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     "audit",
     "cards",
     "imports",
+    "planning",
 ]
 
 MIDDLEWARE = [

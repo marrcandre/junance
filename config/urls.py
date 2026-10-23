@@ -8,4 +8,5 @@ urlpatterns = [
     path("ledger/", include("ledger.urls")),
     path("cards/", include("cards.urls")),
     path("imports/", include("imports.urls")),
+    path("planning/", include("planning.urls")),
 ]
