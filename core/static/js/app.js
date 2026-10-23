@@ -5,6 +5,7 @@
 
   const storageKey = "junance.sidebar.collapsed";
   const setCollapsed = (collapsed) => {
+    document.documentElement.classList.remove("sidebar-precollapsed");
     shell.classList.toggle("sidebar-collapsed", collapsed);
     toggle.setAttribute("aria-expanded", String(!collapsed));
     toggle.setAttribute("aria-label", collapsed ? "Expandir menu" : "Recolher menu");

@@ -7,6 +7,11 @@
   <meta name="color-scheme" content="light dark">
   <title>{% block title %}Junance{% endblock %}</title>
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <script>
+    if (window.localStorage.getItem("junance.sidebar.collapsed") === "true") {
+      document.documentElement.classList.add("sidebar-precollapsed");
+    }
+  </script>
   <script src="https://unpkg.com/htmx.org@2.0.4" defer></script>
   <script src="{% static 'js/app.js' %}" defer></script>
 </head>

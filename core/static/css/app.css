@@ -91,6 +91,14 @@ h1 { margin: 12px 0; max-width: 660px; font-size: clamp(32px, 4vw, 48px); line-h
 .sidebar-collapsed .sidebar-toggle { position: absolute; left: 58px; z-index: 2; width: 24px; height: 24px; border-radius: 50%; background: var(--surface); font-size: 19px; }
 .sidebar-collapsed .nav-item { justify-content: center; padding-left: 8px; padding-right: 8px; }
 .sidebar-collapsed .nav-icon { font-size: 19px; }
+html.sidebar-precollapsed .app-shell { grid-template-columns: 76px minmax(0, 1fr); }
+html.sidebar-precollapsed .sidebar { padding-left: 12px; padding-right: 12px; }
+html.sidebar-precollapsed .sidebar-header { justify-content: center; }
+html.sidebar-precollapsed .brand { padding: 0; }
+html.sidebar-precollapsed .brand-name, html.sidebar-precollapsed .nav-label, html.sidebar-precollapsed .nav-item > span:not(.nav-icon), html.sidebar-precollapsed .sidebar-footer { display: none; }
+html.sidebar-precollapsed .sidebar-toggle { position: absolute; left: 58px; z-index: 2; width: 24px; height: 24px; border-radius: 50%; background: var(--surface); font-size: 19px; }
+html.sidebar-precollapsed .nav-item { justify-content: center; padding-left: 8px; padding-right: 8px; }
+html.sidebar-precollapsed .nav-icon { font-size: 19px; }
 .month-picker { display: flex; align-items: end; gap: 8px; }
 .month-picker label { color: var(--muted); font-size: 12px; font-weight: 700; }
 .month-picker input { min-height: 42px; padding: 0 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); font: inherit; }

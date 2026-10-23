@@ -81,3 +81,4 @@ def test_dashboard_navigation_contains_links_to_main_modules(client):
     assert 'id="sidebar-toggle"' in content
     assert "data-sidebar-toggle" in content
     assert "static/js/app.js" in content
+    assert "sidebar-precollapsed" in content
